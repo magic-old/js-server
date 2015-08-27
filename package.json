@@ -9,6 +9,10 @@
     "start": "gulp watch",
     "postinstall": "gulp"
   },
+  "main": "magicserver.js",
+  "bin": {
+    "magicserver": "bin.js"
+  },
   "contributors": [
     {
       "name": "jascha ehrenreich",
@@ -29,10 +33,6 @@
       "github": "tompeak"
     }
   ],
-  "main": "magicserver.js",
-  "bin": {
-    "magicserver": "bin.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/magicshifter/magicserver"
@@ -54,7 +54,6 @@
     "glob": "^5.0.14",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.2.1",
-    "gulp-chmod": "^1.2.0",
     "gulp-watch": "^4.3.5",
     "mime": "^1.3.4"
   }
