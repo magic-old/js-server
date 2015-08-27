@@ -4,18 +4,19 @@ import {createServer} from 'http';
 import {sync} from 'glob';
 import mime from 'mime';
 import color from 'bash-color';
+import log from 'magiclogger';
 
-export class Server {
+class MagicServer {
   constructor(configPath = join(process.cwd(), 'config.js')) {
     this.config = require(configPath);
 
     const {dirs, files, server} = this.config;
 
     const dir = join(dirs.out, '**', server.files);
-    log.info(`collecting files in ${dir}`);
+    log(`collecting files in ${dir}`);
 
     const globbed = sync(dir, {nodir: true});
-    log.info(`found ${globbed.length} files`);
+    log(`found ${globbed.length} files`);
 
     const collectedFiles = this.collectFiles(globbed);
     this.serve(collectedFiles);
@@ -36,7 +37,7 @@ export class Server {
 
   serve(files) {
     const {port, menuItems} = this.config;
-    log.info(`start server`);
+    log(`start server`);
 
     createServer((req, res) => {
       // Get startTime for logging
@@ -84,12 +85,14 @@ export class Server {
       res.end(file.content);
 
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      log.request(ip, url, startTime);
+
+      const endTime = process.hrtime(startTime);
+      log.request(ip, url, startTime, endTime);
     })
 
     // Listen to port set in config
     .listen(port, () => {
-      log.success(`server listening to ${port}`);
+      log.success(`server listening to localhost:${port}`);
     });
   }
 
@@ -100,42 +103,4 @@ export class Server {
   }
 }
 
-class MagicLogger {
-  info(val) {
-    console.log(val);
-  }
-  success(val) {
-    console.log(color.green(val));
-  }
-  error(val) {
-    console.log(color.red(val));
-  }
-
-  request(ip, url, start) {
-    const end = process.hrtime(start);
-
-    // log the url and response time
-    const nanoseconds = ((end[0] * 1e9) + end[1]);
-    let displayedTime = nanoseconds;
-    let timeUnit = 'ns';
-
-    if (displayedTime > 1000) {
-      displayedTime = displayedTime / 1000;
-      timeUnit = 'µs';
-    }
-
-    if (displayedTime > 1000) {
-      displayedTime = displayedTime / 1000;
-      timeUnit = 'ms';
-    }
-
-    if (displayedTime > 300 && timeUnit === 'ms') {
-      log.error(`${url} Response time over 300ms`);
-    }
-    log.success(`${ip} - ${url} - ${parseInt(displayedTime)}${timeUnit}`);
-  }
-}
-
-const log = new MagicLogger();
-
-export default new Server();
+export default new MagicServer();
