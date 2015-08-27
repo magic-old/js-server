@@ -2,5 +2,3 @@ node_modules
 npm-debug.log
 magicserver.js
 !src/magicserver.js
-bin.js
-!src/bin.js
