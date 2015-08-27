@@ -3,19 +3,19 @@ import {readdirSync, readFileSync, statSync} from 'fs-extra';
 import {createServer} from 'http';
 import {sync} from 'glob';
 import mime from 'mime';
+import color from 'bash-color';
 
-
-export default class Server {
-  constructor(config) {
-    this.config = config;
+export class Server {
+  constructor(configPath = join(process.cwd(), 'config.js')) {
+    this.config = require(configPath);
 
     const {dirs, files, server} = this.config;
 
     const dir = join(dirs.out, '**', server.files);
-    console.log(`collecting files in ${dir}`);
+    log.info(`collecting files in ${dir}`);
 
     const globbed = sync(dir, {nodir: true});
-    console.log(`found ${globbed.length} files`);
+    log.info(`found ${globbed.length} files`);
 
     const collectedFiles = this.collectFiles(globbed);
     this.serve(collectedFiles);
@@ -36,18 +36,19 @@ export default class Server {
 
   serve(files) {
     const {port, menuItems} = this.config;
-    console.log(`start server`);
+    log.info(`start server`);
 
     createServer((req, res) => {
       // Get startTime for logging
-      const startTime = new Date().getTime();
+      const startTime = process.hrtime();
 
       let url = req.url;
 
       const isLocalUrl = menuItems.filter(item => item.href === url).length;
 
       // Return index.html for client side urls and root
-      if (url === '/' || isLocalUrl) {
+      // ♥ = %E2%99%A5
+      if (url === '/' || url === '/%E2%99%A5' || isLocalUrl) {
         url = '/index.html';
       }
 
@@ -82,21 +83,59 @@ export default class Server {
       // End the response with the file contents
       res.end(file.content);
 
-      const endTime = new Date().getTime();
-
-      // log the url and response time
-      console.log(`${url} ${endTime - startTime}ms`);
+      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      log.request(ip, url, startTime);
     })
 
     // Listen to port set in config
     .listen(port, () => {
-      console.log(`server listening to ${port}`);
+      log.success(`server listening to ${port}`);
     });
   }
 
   error404(url, res) {
-    console.log(`could not find file: ${url}`);
+    log.error(`could not find file: ${url}`);
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('File not found');
   }
 }
+
+class MagicLogger {
+  info(val) {
+    console.log(val);
+  }
+  success(val) {
+    console.log(color.green(val));
+  }
+  error(val) {
+    console.log(color.red(val));
+  }
+
+  request(ip, url, start) {
+    const end = process.hrtime(start);
+
+    // log the url and response time
+    const nanoseconds = ((end[0] * 1e9) + end[1]);
+    let displayedTime = nanoseconds;
+    let timeUnit = 'ns';
+
+    if (displayedTime > 1000) {
+      displayedTime = displayedTime / 1000;
+      timeUnit = 'µs';
+    }
+
+    if (displayedTime > 1000) {
+      displayedTime = displayedTime / 1000;
+      timeUnit = 'ms';
+    }
+
+    if (displayedTime > 300 && timeUnit === 'ms') {
+      log.error(`${url} Response time over 300ms`);
+    }
+    log.success(`${ip} - ${url} - ${parseInt(displayedTime)}${timeUnit}`);
+  }
+}
+
+const log = new MagicLogger();
+
+export default new Server();
