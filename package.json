@@ -6,8 +6,7 @@
   "author": "Metalab",
   "license": "AGPL-3.0",
   "scripts": {
-    "start": "gulp watch",
-    "postinstall": "./node_modules/.bin/gulp"
+    "start": "gulp watch"
   },
   "main": "magicserver.js",
   "bin": {
