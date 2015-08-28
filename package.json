@@ -7,7 +7,7 @@
   "license": "AGPL-3.0",
   "scripts": {
     "start": "gulp watch",
-    "postinstall": "gulp"
+    "postinstall": "./node_modules/.bin/gulp"
   },
   "main": "magicserver.js",
   "bin": {
