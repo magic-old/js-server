@@ -3,7 +3,7 @@ import {readdirSync, readFileSync, statSync} from 'fs-extra';
 import {createServer} from 'http';
 import {sync} from 'glob';
 import mime from 'mime';
-import log from 'magiclogger';
+import log from 'logger';
 
 class MagicServer {
   constructor(configPath = join(process.cwd(), 'config.js')) {
@@ -44,11 +44,17 @@ class MagicServer {
 
       let url = req.url;
 
+      // replace trailing slash with empty string
       if(url.length > 1 && url.substr(url.length - 1) === '/') {
         url = url.substr(0, url.length - 1);
       }
 
-      const isLocalUrl = menuItems.filter(item => item.href === url).length;
+      console.log('url', url);
+
+      const isLocalUrl = menuItems.filter(item => {
+        console.log('matches:', item.href.replace('#', '/') === url);
+        return item.href.replace('#', '/') === url;
+      }).length;
       const isPageUrl = Object.keys(pageItems).filter(key => key === url).length;
 
       let file = files[url];

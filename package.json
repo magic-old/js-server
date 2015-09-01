@@ -1,5 +1,5 @@
 {
-  "name": "magicserver",
+  "name": "server",
   "version": "0.0.1",
   "description": "Magically serves static webpages",
   "private": true,
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "gulp watch"
   },
-  "main": "magicserver.js",
+  "main": "index.js",
   "bin": {
     "magicserver": "bin.js"
   },
@@ -50,7 +50,7 @@
     "gulp": "^3.9.0",
     "gulp-babel": "^5.2.1",
     "gulp-watch": "^4.3.5",
-    "magiclogger": "magic/logger",
+    "logger": "magic/logger",
     "mime": "^1.3.4"
   }
 }

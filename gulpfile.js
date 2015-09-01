@@ -8,13 +8,14 @@ var watch = require('gulp-watch');
 
 gulp.task('clean', function(cb) {
   var dist = [
-    'magicserver.js',
+    'index.js',
+    'npm-debug.log',
   ];
   del(dist, cb);
 });
 
 gulp.task('build', ['clean'], function () {
-  return gulp.src(join('src', 'magicserver.js'))
+  return gulp.src(join('src', 'index.js'))
     .pipe(babel())
     .pipe(gulp.dest(__dirname));
 });
@@ -30,4 +31,4 @@ gulp.task('watch', ['default'], function() {
   });
 });
 
-gulp.task('default', ['clean', 'build']);
+gulp.task('default', ['build']);
