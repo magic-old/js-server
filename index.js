@@ -87,12 +87,10 @@ var MagicServer = (function () {
           url = url.substr(0, url.length - 1);
         }
 
-        console.log('url', url);
-
         var isLocalUrl = menuItems.filter(function (item) {
-          console.log('matches:', item.href.replace('#', '/') === url);
-          return item.href.replace('#', '/') === url;
+          return item.href === url || item.href.replace('#', '/') === url;
         }).length;
+
         var isPageUrl = Object.keys(pageItems).filter(function (key) {
           return key === url;
         }).length;

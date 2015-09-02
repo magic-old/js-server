@@ -49,12 +49,10 @@ class MagicServer {
         url = url.substr(0, url.length - 1);
       }
 
-      console.log('url', url);
-
       const isLocalUrl = menuItems.filter(item => {
-        console.log('matches:', item.href.replace('#', '/') === url);
-        return item.href.replace('#', '/') === url;
+        return item.href === url || item.href.replace('#', '/') === url;
       }).length;
+
       const isPageUrl = Object.keys(pageItems).filter(key => key === url).length;
 
       let file = files[url];
