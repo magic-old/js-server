@@ -70,11 +70,12 @@ var MagicServer = (function () {
       var _this = this;
 
       var _config2 = this.config;
+      var CNAME = _config2.CNAME;
       var port = _config2.port;
       var menuItems = _config2.menuItems;
       var pageItems = _config2.pageItems;
 
-      (0, _logger2['default'])('start server');
+      (0, _logger2['default'])('start server on ' + CNAME + ':' + port);
 
       (0, _http.createServer)(function (req, res) {
         // Get startTime for logging
@@ -87,11 +88,11 @@ var MagicServer = (function () {
           url = url.substr(0, url.length - 1);
         }
 
-        var isLocalUrl = menuItems.filter(function (item) {
+        var isLocalUrl = !!menuItems && menuItems.filter(function (item) {
           return item.href === url || item.href.replace('#', '/') === url;
         }).length;
 
-        var isPageUrl = Object.keys(pageItems).filter(function (key) {
+        var isPageUrl = !!pageItems && Object.keys(pageItems).filter(function (key) {
           return key === url;
         }).length;
 

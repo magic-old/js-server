@@ -35,8 +35,8 @@ class MagicServer {
   }
 
   serve(files) {
-    const {port, menuItems, pageItems} = this.config;
-    log(`start server`);
+    const {CNAME, port, menuItems, pageItems} = this.config;
+    log(`start server on ${CNAME}:${port}`);
 
     createServer((req, res) => {
       // Get startTime for logging
@@ -49,11 +49,11 @@ class MagicServer {
         url = url.substr(0, url.length - 1);
       }
 
-      const isLocalUrl = menuItems.filter(item => {
+      const isLocalUrl = !!menuItems && menuItems.filter(item => {
         return item.href === url || item.href.replace('#', '/') === url;
       }).length;
 
-      const isPageUrl = Object.keys(pageItems).filter(key => key === url).length;
+      const isPageUrl = !!pageItems && Object.keys(pageItems).filter(key => key === url).length;
 
       let file = files[url];
 
