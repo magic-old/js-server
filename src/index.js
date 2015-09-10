@@ -22,10 +22,10 @@ class MagicServer {
   }
 
   collectFiles(globbed) {
-    const {dirs} = this.config;
+    const {out} = this.config.dirs;
     let collectedFiles = {};
     globbed.forEach((file) => {
-      collectedFiles[file.replace(dirs.out, '')] = {
+      collectedFiles[file.replace(out, '')] = {
         content: readFileSync(file),
         mime: mime.lookup(file),
       };

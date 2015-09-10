@@ -52,11 +52,11 @@ var MagicServer = (function () {
   _createClass(MagicServer, [{
     key: 'collectFiles',
     value: function collectFiles(globbed) {
-      var dirs = this.config.dirs;
+      var out = this.config.dirs.out;
 
       var collectedFiles = {};
       globbed.forEach(function (file) {
-        collectedFiles[file.replace(dirs.out, '')] = {
+        collectedFiles[file.replace(out, '')] = {
           content: (0, _fsExtra.readFileSync)(file),
           mime: _mime2['default'].lookup(file)
         };
