@@ -8,14 +8,14 @@ var watch = require('gulp-watch');
 
 gulp.task('clean', function(cb) {
   var dist = [
-    'index.js',
+    'server.js',
     'npm-debug.log',
   ];
   del(dist, cb);
 });
 
 gulp.task('build', ['clean'], function () {
-  return gulp.src(join('src', 'index.js'))
+  return gulp.src(join('src', 'server.js'))
     .pipe(babel())
     .pipe(gulp.dest(__dirname));
 });

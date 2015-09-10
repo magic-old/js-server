@@ -6,8 +6,10 @@ import mime from 'mime';
 import log from 'logger';
 
 class MagicServer {
-  constructor(configPath = join(process.cwd(), 'config.js')) {
-    this.config = require(configPath);
+  constructor(config = join(process.cwd(), 'config.js')) {
+    this.config = typeof config === 'string' 
+                  ? require(config)
+                  : config;
 
     const {dirs, files, server} = this.config;
 

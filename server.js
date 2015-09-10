@@ -28,11 +28,11 @@ var _logger2 = _interopRequireDefault(_logger);
 
 var MagicServer = (function () {
   function MagicServer() {
-    var configPath = arguments.length <= 0 || arguments[0] === undefined ? (0, _path.join)(process.cwd(), 'config.js') : arguments[0];
+    var config = arguments.length <= 0 || arguments[0] === undefined ? (0, _path.join)(process.cwd(), 'config.js') : arguments[0];
 
     _classCallCheck(this, MagicServer);
 
-    this.config = require(configPath);
+    this.config = typeof config === 'string' ? require(config) : config;
 
     var _config = this.config;
     var dirs = _config.dirs;
