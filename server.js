@@ -67,94 +67,16 @@ var MagicServer = (function () {
   }, {
     key: 'serve',
     value: function serve(files) {
-      var _this = this;
-
       var _config2 = this.config;
       var CNAME = _config2.CNAME;
       var port = _config2.port;
-      var menuItems = _config2.menuItems;
-      var pageItems = _config2.pageItems;
 
       (0, _logger2['default'])('start server on ' + CNAME + ':' + port);
 
-      (0, _http.createServer)(function (req, res) {
-        // Get startTime for logging
-        var startTime = process.hrtime();
-
-        var url = req.url;
-
-        // replace trailing slash with empty string
-        if (url.length > 1 && url.substr(url.length - 1) === '/') {
-          url = url.substr(0, url.length - 1);
-        }
-
-        var isLocalUrl = !!menuItems && menuItems.filter(function (item) {
-          return item.href === url || item.href.replace('#', '/') === url;
-        }).length;
-
-        var isPageUrl = !!pageItems && Object.keys(pageItems).filter(function (key) {
-          return key === url;
-        }).length;
-
-        var file = files[url];
-
-        // Return index.html for client side urls and root
-        // ♥ = %E2%99%A5
-        if (isLocalUrl) {
-          url = '/index.html';
-          file = files[url];
-        } else if (isPageUrl) {
-          var pageItemUrl = pageItems[url];
-          var pageItemFile = files[pageItemUrl];
-
-          if (pageItemFile && pageItemFile.mime) {
-            url = pageItemUrl;
-            file = pageItemFile;
-          }
-        }
-
-        // 404 if file is empty
-        if (!file || !file.content) {
-          return _this.error404(url, res);
-        }
-
-        // Get original file mimetype
-        var _file = file;
-        var mime = _file.mime;
-
-        var zippedFile = null;
-
-        // Check if client accepts gzip
-        var zipped = req.headers['accept-encoding'].indexOf('gzip') > -1;
-
-        // If accepted, set Content-Encoding and add .gz to url
-        if (zipped) {
-          var testUrl = url + '.gz';
-          if (files[testUrl] && files[testUrl].content) {
-            res.setHeader('Content-Encoding', 'gzip');
-            file = files[testUrl];
-          }
-        }
-
-        // 404 if file is empty
-        if (!file || !file.content) {
-          return _this.error404(url, res);
-        }
-
-        // Set the Content-Type to the mime of the uncompressed file
-        res.setHeader('Content-Type', mime);
-
-        // End the response with the file contents
-        res.end(file.content);
-
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        var endTime = process.hrtime(startTime);
-        _logger2['default'].request(ip, url, startTime, endTime);
-      })
+      var server = this.runServer(files);
 
       // Listen to port set in config
-      .listen(port, function () {
+      server.listen(port, function () {
         _logger2['default'].success('server listening to localhost:' + port);
       });
     }
@@ -164,6 +86,92 @@ var MagicServer = (function () {
       _logger2['default'].error('could not find file with url: ' + url);
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('File not found');
+    }
+  }, {
+    key: 'runServer',
+    value: function runServer(files) {
+      var _this = this;
+
+      return (0, _http.createServer)(function (req, res) {
+        // Get startTime for logging
+        var startTime = process.hrtime();
+
+        var url = _this.getUrl(req.url, files);
+
+        var file = _this.getFile(req, res, files);
+
+        // 404 if file is empty
+        if (!file || !file.content || !file.mime) {
+          return _this.error404(url, res);
+        }
+
+        // Set the Content-Type to the mime of the uncompressed file
+        res.setHeader('Content-Type', file.mime);
+        console.log('file mime: ' + file.mime);
+
+        // End the response with the file contents
+        res.end(file.content);
+
+        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+        var endTime = process.hrtime(startTime);
+        _logger2['default'].request(ip, url, startTime, endTime);
+      });
+    }
+  }, {
+    key: 'getUrl',
+    value: function getUrl(url, files) {
+      var _config3 = this.config;
+      var menuItems = _config3.menuItems;
+      var pageItems = _config3.pageItems;
+
+      // replace trailing slash with empty string
+      if (url.length > 1 && url.substr(url.length - 1) === '/') {
+        url = url.substr(0, url.length - 1);
+      }
+
+      var isLocalUrl = !!menuItems && menuItems.filter(function (item) {
+        return item.href === url || item.href.replace('#', '/') === url;
+      }).length;
+
+      var isPageUrl = !!pageItems && Object.keys(pageItems).filter(function (key) {
+        return key === url;
+      }).length;
+
+      // Return index.html for client side urls and root
+      // ♥ = %E2%99%A5
+      if (isLocalUrl) {
+        url = '/index.html';
+      } else if (isPageUrl) {
+        var pageItemUrl = pageItems[url];
+        var pageItemFile = files[pageItemUrl];
+
+        if (pageItemFile && pageItemFile.mime) {
+          url = pageItemUrl;
+        }
+      }
+
+      return url;
+    }
+  }, {
+    key: 'getFile',
+    value: function getFile(req, res, files) {
+
+      var url = this.getUrl(req.url, files);
+      var file = files[url];
+
+      // Check if client accepts gzip
+      var zipped = req.headers['accept-encoding'].indexOf('gzip') > -1;
+
+      // If accepted, set Content-Encoding and add .gz to url
+      if (zipped) {
+        var testUrl = url + '.gz';
+        if (files[testUrl] && files[testUrl].content) {
+          res.setHeader('Content-Encoding', 'gzip');
+          file.content = files[testUrl].content;
+        }
+      }
+      return file;
     }
   }]);
 
