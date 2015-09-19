@@ -156,7 +156,6 @@ var MagicServer = (function () {
   }, {
     key: 'getFile',
     value: function getFile(req, res, files) {
-
       var url = this.getUrl(req.url, files);
       var file = files[url];
 

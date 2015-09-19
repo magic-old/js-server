@@ -107,6 +107,7 @@ class MagicServer {
       if (pageItemFile && pageItemFile.mime) {
         url = pageItemUrl;
       }
+
     }
 
     return url;
