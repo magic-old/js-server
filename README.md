@@ -9,7 +9,7 @@ go to the
 [magicshifter.net github repository](https://github.com/magicshifter/magicshifter.net/blob/master/src/server.js)
 
 To get a minimal starting point you can just clone:
-[exaple.org[sic]](https://github.com/jaeh/exaple.org)
+[exaple.org[sic]](https://github.com/magic/exaple.org)
 
 
 #### Development
